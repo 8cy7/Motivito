@@ -1,4 +1,4 @@
-<div align="center">
+<div align="center" dir="rtl">
 
 # Motivito — موتيفيتو
 
@@ -10,9 +10,11 @@
 
 </div>
 
+<div dir="rtl">
+
 ## نظرة عامة
 
-**Motivito** منصة تربوية متكاملة مبنية بـ React Native تعمل على iOS وAndroid. تهدف إلى حل مشكلة حقيقية يعاني منها كثير من الآباء: **كيف تجعل طفلك يُكمل مهامه اليومية بشوق وليس بإكراه؟**
+**Motivito** تطبيق جوال تربوي متكامل يعمل على أنظمة iOS وAndroid، يهدف إلى حل مشكلة حقيقية يعاني منها كثير من الآباء: **كيف تجعل طفلك يُكمل مهامه اليومية بشوق وليس بإكراه؟**
 
 الجواب: بتحويل كل مهمة إلى لحظة إنجاز حقيقية — نقاط، مستويات، شارات، خريطة مغامرات، ومكافآت يختارها الطفل بنفسه.
 
@@ -56,6 +58,8 @@
 
 ## البنية التقنية
 
+</div>
+
 ```
 Motivito/
 ├── src/
@@ -71,6 +75,8 @@ Motivito/
     ├── unit/               # اختبارات الوحدة
     └── integration/        # اختبارات التكامل
 ```
+
+<div dir="rtl">
 
 **Stack:**
 
@@ -99,11 +105,17 @@ Motivito/
 
 ### 1. تثبيت الاعتماديات
 
+</div>
+
 ```bash
 npm install
 ```
 
+<div dir="rtl">
+
 لـ iOS فقط، ثبّت الـ pods:
+
+</div>
 
 ```bash
 cd ios && pod install && cd ..
@@ -111,13 +123,19 @@ cd ios && pod install && cd ..
 
 ---
 
+<div dir="rtl">
+
 ### 2. تشغيل Metro Bundler
 
 افتح terminal وشغّل:
 
+</div>
+
 ```bash
 npm start
 ```
+
+<div dir="rtl">
 
 > اتركه يعمل في الخلفية وافتح terminal ثانياً للخطوة التالية.
 
@@ -125,9 +143,13 @@ npm start
 
 ### التشغيل على Android
 
+</div>
+
 ```bash
 npm run android
 ```
+
+<div dir="rtl">
 
 > تأكد أن جهاز أو محاكي Android يعمل أولاً عبر `adb devices`.
 
@@ -135,15 +157,23 @@ npm run android
 
 ### التشغيل على iOS
 
+</div>
+
 ```bash
 npm run ios
 ```
 
+<div dir="rtl">
+
 لتحديد محاكي بعينه:
+
+</div>
 
 ```bash
 npm run ios -- --simulator="iPhone 15 Pro"
 ```
+
+<div dir="rtl">
 
 > التطبيق يدعم iPad بواجهة Landscape مستقلة.
 
@@ -153,43 +183,44 @@ npm run ios -- --simulator="iPhone 15 Pro"
 
 ### تشغيل جميع الاختبارات
 
+</div>
+
 ```bash
 npm test
 ```
+
+<div dir="rtl">
 
 ### تشغيل ملف اختبار محدد
 
 الطريقة الأضمن هي تمرير مسار الملف مباشرة لـ `npx jest`:
 
+</div>
+
 ```bash
-# اختبار نظام المستويات والشارات
 npx jest __tests__/integration/levelAndBadge.test.ts
-
-# اختبار تسجيل الدخول والتخزين
 npx jest __tests__/integration/loginAndStorage.test.ts
-
-# اختبار التخزين المحلي
 npx jest __tests__/integration/storage.test.ts
-
-# اختبار دوال المستويات
 npx jest __tests__/unit/levelUtils.test.ts
-
-# اختبار دوال الشارات
 npx jest __tests__/unit/badgeUtils.test.ts
-
-# اختبار التحقق من المدخلات
 npx jest __tests__/unit/loginValidation.test.ts
 ```
 
+<div dir="rtl">
+
 ### خيارات إضافية
 
+</div>
+
 ```bash
-# عرض تفاصيل كاملة لكل اختبار
+# عرض تفاصيل كاملة
 npm test -- --verbose
 
-# وضع المراقبة (يُعيد التشغيل تلقائياً عند حفظ أي تغيير)
+# وضع المراقبة
 npm test -- --watch
 ```
+
+<div dir="rtl">
 
 ### ما تغطيه الاختبارات
 
@@ -204,5 +235,7 @@ npm test -- --watch
 <div align="center">
 
 **Motivito** — حوّل مهام طفلك إلى مغامرة
+
+</div>
 
 </div>
