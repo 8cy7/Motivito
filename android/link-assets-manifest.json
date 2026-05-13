@@ -1,0 +1,13 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/saudi_riyal.ttf",
+      "sha1": "e79a79ab2b4c08ec993a0f8d21bfd850ff928540"
+    },
+    {
+      "path": "assets/fonts/SaudiRiyal.ttf",
+      "sha1": "e79a79ab2b4c08ec993a0f8d21bfd850ff928540"
+    }
+  ]
+}

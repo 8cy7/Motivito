@@ -1,0 +1,331 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// الوالد (Parent Account)
+// =============================================
+model Parent {
+  id                String         @id @default(cuid())
+  email             String         @unique
+  passwordHash      String
+  name              String
+  phone             String?
+  parentPinHash     String
+  isPremium         Boolean        @default(false)
+  premiumExpiresAt  DateTime?
+  fcmToken          String?
+  language          String         @default("ar")
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  children          Child[]
+  rewards           Reward[]
+  tasks             Task[]
+  notifications     Notification[]
+  subscription      Subscription?
+  sessions          Session[]
+  aiChats           AiChat[]
+}
+
+// =============================================
+// الطفل
+// =============================================
+model Child {
+  id               String    @id @default(cuid())
+  parentId         String
+  name             String
+  avatar           String
+  isAvatarImage    Boolean   @default(false)
+  gender           Gender
+  color            String    @default("#4facfe")
+  isPinned         Boolean   @default(false)
+
+  level            Int       @default(0)
+  xp               Int       @default(0)
+  stars            Int       @default(0)
+  totalStars       Int       @default(0)
+  challengeLevel         Int       @default(0)  // 0 = أول تحدي مفتوح، N = أول N تحديات مكتملة
+  lastChallengeClaimedAt DateTime?              // وقت آخر استلام (لحساب الكاونترات من الصفر)
+
+  pinHash          String
+  fcmToken         String?
+  deviceToken      String?
+  deviceTokenExp   DateTime?
+
+  unlockedEmojis   String[]  @default([])
+
+  friendCode       String?   @unique  // MOTI-XXXX
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  parent           Parent    @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  tasks            Task[]
+  badges           Badge[]
+  rewardRequests   RewardRequest[]
+  battlePassUnlocks BattlePassUnlock[]
+  notifications    Notification[]
+  sentRequests     FriendRequest[] @relation("SentRequests")
+  receivedRequests FriendRequest[] @relation("ReceivedRequests")
+}
+
+enum Gender {
+  boy
+  girl
+}
+
+// =============================================
+// الشارات
+// =============================================
+model Badge {
+  id          String   @id @default(cuid())
+  childId     String
+  level       Int
+  emoji       String
+  color       String
+  earnedDate  DateTime @default(now())
+
+  child       Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, level])
+}
+
+// =============================================
+// المهام
+// =============================================
+model Task {
+  id              String          @id @default(cuid())
+  childId         String
+  parentId        String
+  title           String
+  description     String?
+  difficulty      TaskDifficulty
+  points          Int
+  category        TaskCategory
+  frequency       TaskFrequency
+  dueDate         DateTime?
+
+  isCompleted     Boolean         @default(false)
+  completedAt     DateTime?
+  approvalStatus  ApprovalStatus  @default(pending)
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  timeSpent       Int?
+
+  lastRenewedAt   DateTime?
+  isActive        Boolean         @default(true)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  child           Child           @relation(fields: [childId], references: [id], onDelete: Cascade)
+  parent          Parent          @relation(fields: [parentId], references: [id])
+}
+
+enum TaskDifficulty {
+  easy
+  medium
+  hard
+}
+
+enum TaskCategory {
+  daily
+  weekly
+  special
+}
+
+enum TaskFrequency {
+  once
+  daily
+  weekly
+}
+
+enum ApprovalStatus {
+  pending
+  completed
+  approved
+  rejected
+}
+
+// =============================================
+// كتالوج الجوائز
+// =============================================
+model Reward {
+  id          String    @id @default(cuid())
+  parentId    String
+  childId     String?
+  name        String
+  emoji       String
+  pointsCost  Int
+  type        RewardType
+  category    String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  parent      Parent    @relation(fields: [parentId], references: [id])
+  requests    RewardRequest[]
+}
+
+enum RewardType {
+  small
+  medium
+  large
+}
+
+// =============================================
+// طلبات الجوائز
+// =============================================
+model RewardRequest {
+  id           String        @id @default(cuid())
+  childId      String
+  rewardId     String
+  starsCost    Int
+  status       RequestStatus @default(pending)
+  requestedAt  DateTime      @default(now())
+  deliveredAt  DateTime?
+  rejectedAt   DateTime?
+  rejectionNote String?
+
+  child        Child         @relation(fields: [childId], references: [id], onDelete: Cascade)
+  reward       Reward        @relation(fields: [rewardId], references: [id])
+}
+
+enum RequestStatus {
+  pending
+  delivered
+  rejected
+}
+
+// =============================================
+// الإشعارات
+// =============================================
+model Notification {
+  id        String           @id @default(cuid())
+  parentId  String?
+  childId   String?
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  parent    Parent?          @relation(fields: [parentId], references: [id])
+  child     Child?           @relation(fields: [childId], references: [id])
+}
+
+enum NotificationType {
+  task_assigned
+  task_completed
+  task_approved
+  task_rejected
+  reward_requested
+  reward_delivered
+  reward_rejected
+  level_up
+  badge_earned
+  battle_pass_unlock
+  daily_tasks_renewed
+}
+
+// =============================================
+// الجلسات (Refresh Tokens)
+// =============================================
+model Session {
+  id           String   @id @default(cuid())
+  parentId     String
+  refreshToken String   @unique
+  deviceId     String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  parent       Parent   @relation(fields: [parentId], references: [id], onDelete: Cascade)
+}
+
+// =============================================
+// الاشتراكات (Premium)
+// =============================================
+model Subscription {
+  id               String             @id @default(cuid())
+  parentId         String             @unique
+  status           SubscriptionStatus
+  plan             String             @default("premium_monthly")
+  amount           Float
+  currency         String             @default("SAR")
+  startDate        DateTime
+  endDate          DateTime
+  paymentRef       String?
+  tapChargeId      String?
+  autoRenew        Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  parent           Parent             @relation(fields: [parentId], references: [id])
+}
+
+enum SubscriptionStatus {
+  active
+  expired
+  cancelled
+  trial
+}
+
+// =============================================
+// Battle Pass
+// =============================================
+model BattlePassUnlock {
+  id          String   @id @default(cuid())
+  childId     String
+  level       Int
+  rewardType  String
+  rewardData  Json
+  unlockedAt  DateTime @default(now())
+
+  child       Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, level])
+}
+
+// =============================================
+// نظام الأصدقاء
+// =============================================
+model FriendRequest {
+  id         String              @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     FriendRequestStatus @default(pending)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  sender     Child @relation("SentRequests",      fields: [senderId],   references: [id], onDelete: Cascade)
+  receiver   Child @relation("ReceivedRequests",   fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+}
+
+enum FriendRequestStatus {
+  pending
+  accepted
+  rejected
+}
+
+// =============================================
+// AI Chat History
+// =============================================
+model AiChat {
+  id        String   @id @default(cuid())
+  parentId  String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  parent    Parent   @relation(fields: [parentId], references: [id], onDelete: Cascade)
+}
